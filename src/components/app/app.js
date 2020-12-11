@@ -1,0 +1,76 @@
+import React, { Component } from "react";
+import { Col, Row, Container } from "reactstrap";
+import Header from "../header";
+import RandomChar from "../randomChar";
+import { Button } from "reactstrap";
+import ErrorMessage from "../errorMessage";
+import gotService from "../../services/gotService";
+import { CharacterPage, BooksPage, HousesPage, BooksItem } from "../pages";
+import { BrowserRouter as Router, Route } from "react-router-dom";
+import "./app.css";
+
+export default class App extends Component {
+  gotService = new gotService();
+  state = {
+    showRandomChar: true,
+    error: false,
+  };
+
+  componentDidCatch() {
+    console.log("error");
+    this.setState({
+      error: true,
+    });
+  }
+
+  toggleRandomChar = () => {
+    this.setState((state) => {
+      return {
+        showRandomChar: !state.showRandomChar,
+      };
+    });
+  };
+
+  render() {
+    if (this.state.error) {
+      return <ErrorMessage />;
+    }
+
+    const char = this.state.showRandomChar ? <RandomChar /> : null;
+
+    return (
+      <Router>
+        <div className="app">
+          <Container>
+            <Header />
+          </Container>
+          <Container>
+            <Row>
+              <Col lg={{ size: 5, offset: 0 }}>
+                {char}
+                <Button
+                  onClick={this.toggleRandomChar}
+                  outline
+                  color="info"
+                  style={{ marginBottom: "20px" }}
+                >
+                  Toggle random char
+                </Button>
+              </Col>
+            </Row>
+            <Route path="/characters" component={CharacterPage} />
+            <Route path="/houses" component={HousesPage} />
+            <Route path="/books" exact component={BooksPage} />
+            <Route
+              path="/books/:id"
+              render={({ match }) => {
+                const { id } = match.params;
+                return <BooksItem bookId={id} />;
+              }}
+            />
+          </Container>
+        </div>
+      </Router>
+    );
+  }
+}
